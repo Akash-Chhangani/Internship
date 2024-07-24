@@ -4,7 +4,8 @@ import Loader from "../Common/Loader";
 import useSellers from "../../hooks/useSellers";
 
 const Sellers = () => {
-  const { data: sellers, error, isLoading } = useSellers;
+  const { data: sellers, error, isLoading } = useSellers();
+
   const [name, setName] = useState("");
 
   const addSeller = () => {
