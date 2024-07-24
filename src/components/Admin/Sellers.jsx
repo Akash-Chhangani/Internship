@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import apiClient from "../../utils/api-client";
 import Loader from "../Common/Loader";
 import { useQuery } from "@tanstack/react-query";
 
 const Sellers = () => {
-  const fetchSellers = () => {
-    apiClient.get("/users").then((res) => res.data);
-  };
-  const { data: sellers } = useQuery({
+  const fetchSellers = () => apiClient.get("/users").then((res) => res.data);
+
+  const {
+    data: sellers,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: ["sellers"],
     queryFn: fetchSellers,
   });
@@ -55,8 +58,8 @@ const Sellers = () => {
       <h3>Admin Sellers Page</h3>
       <input type="text" onChange={(e) => setName(e.target.value)} />
       <button onClick={addSeller}>Add Seller</button>
-      {/* {isLoading && <Loader />} */}
-      {/* {errors && <em>{errors}</em>} */}
+      {isLoading && <Loader />}
+      {error && <em>{error.message}</em>}
 
       <table>
         <tbody>
