@@ -1,19 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../utils/api-client";
 
-const useTodos = (userId) => {
-  const params = {};
-  if (userId) {
-    params.userId = userId;
-  }
+const useTodos = (query) => {
   const fetchTodos = () =>
     apiClient
       .get(`/todos`, {
-        params,
+        params: {
+          _limit: query.pageSize,
+          _start: (query.page - 1) * query.pageSize,
+        },
       })
       .then((res) => res.data);
   return useQuery({
-    queryKey: userId ? ["users", userId, "todos"] : ["todos"],
+    queryKey: ["todos", query],
     queryFn: fetchTodos,
   });
 };
