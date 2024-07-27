@@ -5,6 +5,7 @@ import useSellers from "../../hooks/useSellers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Sellers = () => {
+  const [name, setName] = useState("");
   const { data: sellers, error, isLoading } = useSellers();
   const queryClient = useQueryClient();
   const addSellersMutation = useMutation({
@@ -18,8 +19,6 @@ const Sellers = () => {
     },
   });
 
-  const [name, setName] = useState("");
-
   const addSeller = () => {
     const newSeller = {
       name,
@@ -29,11 +28,30 @@ const Sellers = () => {
     addSellersMutation.mutate(newSeller);
   };
 
+  const deleteSellerMutation = useMutation({
+    mutationFn: (id) =>
+      apiClient.delete(`/users/${id}`).then((res) => res.data),
+  });
+
+  const updatedSellerMutation = useMutation({
+    mutationFn: (updatedSeller) =>
+      apiClient
+        .patch(`/users/${updatedSeller.id}`, updatedSeller)
+        .then((res) => res.data),
+    onSuccess: (updatedSeller) => {
+      queryClient.setQueryData(["sellers"], (sellers) =>
+        sellers.map((s) => (s.id === updatedSeller.id ? updatedSeller : s))
+      );
+    },
+  });
+
   const deleteSeller = (id) => {
-    setSellers(sellers.filter((s) => s.id !== id));
-    apiClient.delete(`/users/${id}`).catch((err) => {
-      setErrors(err.message);
-      setSellers(sellers);
+    deleteSellerMutation.mutate(id, {
+      onSuccess: () => {
+        queryClient.setQueryData(["sellers"], (sellers) =>
+          sellers.filter((s) => s.id !== id)
+        );
+      },
     });
   };
 
@@ -42,12 +60,8 @@ const Sellers = () => {
       ...seller,
       name: seller.name + " Updated",
     };
-    setSellers(sellers.map((s) => (s.id === seller.id ? updatedSeller : s)));
 
-    apiClient.patch(`/users/${seller.id}`, updatedSeller).catch((err) => {
-      setErrors(err.message);
-      setSellers(sellers);
-    });
+    updatedSellerMutation.mutate(updatedSeller);
   };
 
   return (
