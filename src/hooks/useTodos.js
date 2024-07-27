@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import apiClient from "../utils/api-client";
 
 const useTodos = (query) => {
@@ -14,6 +14,7 @@ const useTodos = (query) => {
   return useQuery({
     queryKey: ["todos", query],
     queryFn: fetchTodos,
+    placeholderData: keepPreviousData,
   });
 };
 
