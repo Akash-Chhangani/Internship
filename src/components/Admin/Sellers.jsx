@@ -2,9 +2,21 @@ import React, { useState } from "react";
 import apiClient from "../../utils/api-client";
 import Loader from "../Common/Loader";
 import useSellers from "../../hooks/useSellers";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Sellers = () => {
   const { data: sellers, error, isLoading } = useSellers();
+  const queryClient = useQueryClient();
+  const addSellersMutation = useMutation({
+    mutationFn: (newSeller) =>
+      apiClient.post("/users", newSeller).then((res) => res.data),
+    onSuccess: (savedSeller, newSeller) => {
+      queryClient.setQueryData(["sellers"], (sellers) => [
+        savedSeller,
+        ...sellers,
+      ]);
+    },
+  });
 
   const [name, setName] = useState("");
 
@@ -13,15 +25,8 @@ const Sellers = () => {
       name,
       id: sellers.length + 1,
     };
-    setSellers([newSeller, ...sellers]);
 
-    apiClient
-      .post("/users", newSeller)
-      .then((res) => setSellers([res.data, ...sellers]))
-      .catch((err) => {
-        setErrors(err.message);
-        setSellers(sellers);
-      });
+    addSellersMutation.mutate(newSeller);
   };
 
   const deleteSeller = (id) => {
