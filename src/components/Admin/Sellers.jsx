@@ -68,7 +68,9 @@ const Sellers = () => {
     <>
       <h3>Admin Sellers Page</h3>
       <input type="text" onChange={(e) => setName(e.target.value)} />
-      <button onClick={addSeller}>Add Seller</button>
+      <button disabled={addSellersMutation.isPending} onClick={addSeller}>
+        {addSellersMutation.isPending ? "Adding Seller" : "Add Seller"}
+      </button>
       {isLoading && <Loader />}
       {error && <em>{error.message}</em>}
       {addSellersMutation.error && <em>{addSellersMutation.error.message}</em>}
