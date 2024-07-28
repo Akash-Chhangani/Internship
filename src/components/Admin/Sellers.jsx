@@ -1,36 +1,19 @@
 import React, { useState } from "react";
-import apiClient from "../../utils/api-client";
 import Loader from "../Common/Loader";
-import useSellers from "../../hooks/useSellers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import useAddSeller from "../../hooks/sellers/useAddSeller";
+import useDeleteSeller from "./../../hooks/sellers/useDeleteSeller";
+import useUpdateSeller from "../../hooks/sellers/useUpdateSeller";
+import useSellers from "../../hooks/sellers/useSellers";
 
 const Sellers = () => {
   const [name, setName] = useState("");
   const { data: sellers, error, isLoading } = useSellers();
   const queryClient = useQueryClient();
 
-  const addSellersMutation = useMutation({
-    mutationFn: (newSeller) =>
-      apiClient.post("/users", newSeller).then((res) => res.data),
-
-    onMutate: (newSeller) => {
-      const previousSellers = queryClient.getQueryData(["sellers"]);
-      queryClient.setQueryData(["sellers"], (old) => [newSeller, ...old]);
-      return { previousSellers };
-    },
-
-    onSuccess: (savedSeller, newSeller) => {
-      queryClient.setQueryData(["sellers"], (sellers) =>
-        sellers.map((seller) => (seller === newSeller ? savedSeller : seller))
-      );
-    },
-
-    onError: (error, newSeller, context) => {
-      if (context?.previousSellers) {
-        queryClient.setQueryData(["sellers"], context.previousSellers);
-      }
-    },
-  });
+  const addSellersMutation = useAddSeller();
+  const deleteSellerMutation = useDeleteSeller();
+  const updatedSellerMutation = useUpdateSeller();
 
   const addSeller = () => {
     const newSeller = {
@@ -40,23 +23,6 @@ const Sellers = () => {
 
     addSellersMutation.mutate(newSeller);
   };
-
-  const deleteSellerMutation = useMutation({
-    mutationFn: (id) =>
-      apiClient.delete(`/users/${id}`).then((res) => res.data),
-  });
-
-  const updatedSellerMutation = useMutation({
-    mutationFn: (updatedSeller) =>
-      apiClient
-        .patch(`/users/${updatedSeller.id}`, updatedSeller)
-        .then((res) => res.data),
-    onSuccess: (updatedSeller) => {
-      queryClient.setQueryData(["sellers"], (sellers) =>
-        sellers.map((s) => (s.id === updatedSeller.id ? updatedSeller : s))
-      );
-    },
-  });
 
   const deleteSeller = (id) => {
     deleteSellerMutation.mutate(id, {

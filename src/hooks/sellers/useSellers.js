@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "../utils/api-client";
+import apiClient from "../../utils/api-client";
 
 const fetchSellers = () => apiClient.get("/users").then((res) => res.data);
 
