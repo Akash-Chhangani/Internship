@@ -71,6 +71,7 @@ const Sellers = () => {
       <button onClick={addSeller}>Add Seller</button>
       {isLoading && <Loader />}
       {error && <em>{error.message}</em>}
+      {addSellersMutation.error && <em>{addSellersMutation.error.message}</em>}
 
       <table>
         <tbody>
